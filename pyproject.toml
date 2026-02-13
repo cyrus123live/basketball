@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "basketball"
+version = "0.1.0"
+description = "ML system for finding edges in basketball betting markets"
+requires-python = ">=3.11"
+dependencies = [
+    "cbbpy>=2.0",
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "scikit-learn>=1.3",
+    "xgboost>=2.0",
+    "requests>=2.31",
+    "lxml>=4.9",
+    "openpyxl>=3.1",
+    "python-dotenv>=1.0",
+    "schedule>=1.2",
+    "thefuzz[speedup]>=0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "ipython>=8.0",
+    "jupyter>=1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
