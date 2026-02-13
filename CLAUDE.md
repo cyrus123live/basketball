@@ -66,8 +66,8 @@ The user specifically wants to bet against other players, not books. Key advanta
 ## Data Sources
 
 ### Free (Priority)
-- **Barttorvik** (barttorvik.com) — free KenPom alternative, AdjO/AdjD/AdjT/Four Factors, scrapeable, data back to 2008
-- **ESPN API** — undocumented but reliable, box scores, PBP, schedules, some odds. Use `cbbpy` Python package.
+- **ESPN JSON API** — undocumented but reliable JSON endpoints for scoreboard + boxscores. We use these directly (faster than cbbpy HTML scraping). Scoreboard: 1 request/day for all games. Summary: 1 request/game for full boxscore.
+- **Barttorvik** (barttorvik.com) — free KenPom alternative, AdjO/AdjD/AdjT/Four Factors, scrapeable, data back to 2008. Requires JS verification workaround (POST `js_test_submitted=1`).
 - **SBRO** (sportsbookreviewsonline.com) — free historical closing lines (spreads, totals, ML) back to ~2007-08
 
 ### Cheap ($20-50/yr)
@@ -75,11 +75,10 @@ The user specifically wants to bet against other players, not books. Key advanta
 - **The Odds API** ($20/mo+) — real-time odds from multiple books, essential for CLV tracking
 
 ### Python Stack
-- `cbbpy` — college basketball box scores and PBP from ESPN
-- `kenpompy` — KenPom data (requires subscription)
-- `nba_api` — NBA data from NBA.com (NBA only, not college)
-- `sportsipy` — Sports Reference scraper (fragile, may need patching)
-- `hoopR` (R) — most comprehensive college basketball package if willing to use R
+- `requests` + ESPN JSON API — primary data source for box scores (replaced cbbpy HTML scraping for ~8x speedup)
+- `pandas` + `pd.read_html` — Barttorvik scraping (with `StringIO` workaround)
+- `kenpompy` — KenPom data (requires subscription, not yet integrated)
+- `thefuzz` — fuzzy team name matching for SBRO odds → game matching
 
 ## Model Architecture
 
@@ -112,29 +111,50 @@ The user specifically wants to bet against other players, not books. Key advanta
 ## Project Structure
 ```
 basketball/
-├── CLAUDE.md              # This file
-├── research-prompts.md    # Prompts for deep research agents
-├── research/              # Research outputs (from Docker runs)
-│   ├── 00-summary.md
-│   ├── 01-exchanges.md
-│   ├── 02-ml-features.md
-│   ├── 03-data-sources.md
-│   └── 04-strategy.md
-├── data/                  # Raw and processed data
-│   ├── raw/               # Downloaded/scraped data
-│   ├── processed/         # Cleaned features
-│   └── odds/              # Historical and live odds
-├── models/                # Trained models and configs
-├── notebooks/             # Exploration and analysis
-├── src/                   # Source code
-│   ├── data/              # Data collection and processing
-│   ├── features/          # Feature engineering
-│   ├── models/            # Model training and evaluation
-│   ├── betting/           # Bet sizing, execution, tracking
-│   └── utils/             # Shared utilities
-├── backtests/             # Backtest results and analysis
-└── logs/                  # Bet logs, P&L tracking
+├── CLAUDE.md                        # This file
+├── README.md                        # Project overview and quick start
+├── PLAN.md                          # Multi-phase implementation plan
+├── pyproject.toml                   # Dependencies (pip install -e .)
+├── .env                             # API keys (never committed)
+├── .gitignore
+├── research-prompts.md              # Prompts for deep research agents
+├── research/                        # Research outputs
+├── src/
+│   ├── data/
+│   │   ├── cbbpy_collector.py       # ESPN JSON API box scores (~0.7s/game)
+│   │   ├── barttorvik_collector.py  # Barttorvik team ratings scraper
+│   │   ├── odds_api_collector.py    # The Odds API client
+│   │   └── sbro_loader.py          # SBRO historical odds parser
+│   ├── features/
+│   │   └── compute.py              # Four Factors, pace, EWMA features
+│   ├── models/                     # Model training (Phase 1)
+│   ├── betting/                    # Bet sizing (Phase 2)
+│   └── utils/
+│       ├── db.py                   # SQLite FeatureStore (anti-lookahead)
+│       └── config.py               # Paths, constants, helpers
+├── scripts/
+│   ├── build_historical.py         # One-time dataset assembly (~45 min/season)
+│   ├── daily_collect.py            # Daily cron pipeline
+│   └── paper_trade.py              # Naive LogReg paper trading
+├── tests/                          # 56 unit/integration tests
+├── data/
+│   ├── basketball.db               # SQLite database (gitignored)
+│   ├── raw/                        # CSV checkpoints (gitignored)
+│   ├── odds/sbro/                  # SBRO Excel files (manual download)
+│   └── team_name_crosswalk.csv     # ESPN/Barttorvik/SBRO name mapping
+├── notebooks/                      # Exploration and analysis
+├── models/                         # Trained models
+├── backtests/                      # Backtest results
+└── logs/                           # Daily pipeline logs
 ```
+
+## Phase 0 Status (Complete)
+- Data collectors: ESPN JSON API (box scores), Barttorvik (ratings), Odds API (live lines), SBRO (historical odds)
+- SQLite feature store with 7 tables, anti-lookahead temporal queries
+- Feature engine: possessions, pace, ORtg/DRtg, Four Factors via EWMA
+- Naive paper trading pipeline (logistic regression, 2 features)
+- 56 tests passing
+- **Next:** Run `build_historical.py` for full 2016-2026 dataset, then daily cron for 14 days
 
 ## Key References
 - Dean Oliver, "Basketball on Paper" (2004) — Four Factors framework
