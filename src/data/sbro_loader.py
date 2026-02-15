@@ -74,8 +74,8 @@ def load_sbro_file(filepath: Path | str) -> pd.DataFrame:
 def parse_sbro_season(filepath: Path | str, season: int) -> list[dict]:
     """Parse an SBRO file into structured odds records.
 
-    SBRO format: rows alternate between visitor and home team.
-    The date appears on the visitor row; the home row has no date.
+    SBRO format: rows alternate between visitor (VH=V) and home (VH=H) team.
+    Every row has a date and a VH indicator.
 
     Args:
         filepath: Path to the SBRO Excel file.
@@ -89,7 +89,6 @@ def parse_sbro_season(filepath: Path | str, season: int) -> list[dict]:
         return []
 
     odds_records = []
-    current_date = None
     visitor_row = None
 
     for _, row in df.iterrows():
@@ -98,38 +97,39 @@ def parse_sbro_season(filepath: Path | str, season: int) -> list[dict]:
         if not team or team.lower() in ("team", "nan", ""):
             continue
 
-        # Check if this row has a date (visitor row)
-        date_val = row.get("date")
-        if pd.notna(date_val):
-            current_date = _parse_date(date_val, season)
+        vh = str(row.get("vh", "")).strip().upper()
+
+        if vh == "V":
             visitor_row = row
             continue
 
-        # This is a home row (no date)
-        if visitor_row is None or current_date is None:
-            continue
+        if vh == "H" and visitor_row is not None:
+            home_row = row
+            game_date = _parse_date(home_row.get("date"), season)
+            if game_date is None:
+                game_date = _parse_date(visitor_row.get("date"), season)
 
-        home_row = row
-        away_team = str(visitor_row.get("team", "")).strip()
-        home_team = str(home_row.get("team", "")).strip()
+            away_team = str(visitor_row.get("team", "")).strip()
+            home_team = str(home_row.get("team", "")).strip()
 
-        # Parse the odds values
-        record = {
-            "season": season,
-            "game_date": current_date,
-            "away_team_name": away_team,
-            "home_team_name": home_team,
-            "game_id": None,  # Will be matched later
-            "spread_open": _parse_spread(home_row.get("spread_open")),
-            "spread_close": _parse_spread(home_row.get("spread_close")),
-            "total_open": _parse_total(visitor_row.get("spread_open")),
-            "total_close": _parse_total(visitor_row.get("spread_close")),
-            "home_ml": _safe_int(home_row.get("ml")),
-            "away_ml": _safe_int(visitor_row.get("ml")),
-        }
+            # In SBRO, the visitor row's Open/Close are the total,
+            # and the home row's Open/Close are the spread.
+            record = {
+                "season": season,
+                "game_date": game_date,
+                "away_team_name": away_team,
+                "home_team_name": home_team,
+                "game_id": None,  # Will be matched later
+                "spread_open": _parse_spread(home_row.get("spread_open")),
+                "spread_close": _parse_spread(home_row.get("spread_close")),
+                "total_open": _parse_total(visitor_row.get("spread_open")),
+                "total_close": _parse_total(visitor_row.get("spread_close")),
+                "home_ml": _safe_int(home_row.get("ml")),
+                "away_ml": _safe_int(visitor_row.get("ml")),
+            }
 
-        odds_records.append(record)
-        visitor_row = None
+            odds_records.append(record)
+            visitor_row = None
 
     logger.info(
         "Parsed %d odds records from %s (season %d)",
@@ -164,10 +164,160 @@ def load_all_sbro(sbro_dir: Path = SBRO_DIR) -> list[dict]:
     return all_records
 
 
+def _normalize_name(name: str) -> str:
+    """Normalize a team name for matching.
+
+    Handles both ESPN format ('Miami (OH) RedHawks') and
+    SBRO format ('MiamiOhio') by stripping to a common form.
+    """
+    import unicodedata
+
+    s = name.strip()
+
+    # Remove parenthetical qualifiers like (OH), (FL), (NY)
+    s = re.sub(r"\([^)]*\)", "", s)
+
+    # Split camelCase: 'MiamiOhio' -> 'Miami Ohio'
+    s = re.sub(r"([a-z])([A-Z])", r"\1 \2", s)
+    # Split letter-to-digit: 'A&M' stays, but 'NC2' etc.
+    s = re.sub(r"([a-zA-Z])(\d)", r"\1 \2", s)
+
+    # Normalize unicode
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+
+    # Lowercase, strip punctuation except &
+    s = s.lower()
+    s = re.sub(r"[^a-z0-9& ]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+
+    # Exact whole-name substitutions (before abbreviation expansion)
+    exact_subs = {
+        "app state": "appalachian state",
+        "nc wilmington": "unc wilmington",
+        "ncwilmington": "unc wilmington",
+        "nc state": "nc state",
+        "nc greensboro": "unc greensboro",
+        "nc asheville": "unc asheville",
+        "nc charlotte": "charlotte",
+        "utarlington": "ut arlington",
+        "utsa": "ut san antonio",
+        "utep": "ut el paso",
+        "ut rio grande valley": "ut rio grande valley",
+        "fla atlantic": "florida atlantic",
+        "fla gulf coast": "florida gulf coast",
+        "ark pine bluff": "arkansas pine bluff",
+        "ark little rock": "little rock",
+        "arkansas lr": "little rock",
+        "southern cal": "usc",
+        "ncstate": "nc state",
+        "illinois chicago": "uic",
+        "md baltimore co": "umbc",
+        "mdbaltimore co": "umbc",
+        "wisc green bay": "green bay",
+        "wisc milwaukee": "milwaukee",
+        "siuedwardsville": "siu edwardsville",
+        "utrio grande valley": "ut rio grande valley",
+        "state peter s": "saint peters",
+        "state peter": "saint peters",
+        "florida am": "florida a&m",
+        "texas am": "texas a&m",
+        "prairie view am": "prairie view a&m",
+        "st josephs": "saint josephs",
+        "st johns": "saint johns",
+        "st louis": "saint louis",
+        "st marys": "saint marys",
+        "st bonaventure": "saint bonaventure",
+        "st peters": "saint peters",
+        "st thomas": "saint thomas",
+        "st francis": "saint francis",
+        "miami ohio": "miami oh",
+        "miami fl": "miami",
+    }
+    for old, new in exact_subs.items():
+        if s == old or s.startswith(old + " "):
+            s = new + s[len(old):]
+            break
+
+    # Abbreviation expansions (word boundaries)
+    abbrevs = [
+        (r"\bst\b", "state"),
+        (r"\bso\b", "south"),
+        (r"\bse\b", "southeast"),
+        (r"\bsw\b", "southwest"),
+        (r"\btenn\b", "tennessee"),
+        (r"\bokla\b", "oklahoma"),
+        (r"\bmiss\b", "mississippi"),
+        (r"\bfla\b", "florida"),
+        (r"\bark\b", "arkansas"),
+        (r"\bwis\b", "wisconsin"),
+        (r"\bconn\b", "connecticut"),
+    ]
+    for pattern, repl in abbrevs:
+        s = re.sub(pattern, repl, s)
+
+    # Expand UNC -> unc (keep as-is, ESPN uses it)
+    # Don't expand NC at start — too ambiguous (NC State vs North Carolina)
+
+    # Remove common mascot/suffix words (ESPN includes these, SBRO doesn't)
+    # Use multi-word mascots first, then single-word
+    multi_mascots = [
+        "fighting illini", "tar heels", "nittany lions", "scarlet knights",
+        "crimson tide", "yellow jackets", "demon deacons", "blue devils",
+        "golden gophers", "horned frogs", "red raiders", "red wolves",
+        "red hawks", "sun devils", "golden lions", "delta devils",
+        "blue jays", "golden flashes", "thundering herd", "golden griffins",
+        "purple eagles", "red foxes", "river hawks", "rainbow warriors",
+        "ragin cajuns", "mean green", "black knights", "blue hose",
+        "great danes", "running rebels", "fighting irish", "fighting hawks",
+        "runnin bulldogs",
+    ]
+
+    for mascot in multi_mascots:
+        if s.endswith(" " + mascot):
+            s = s[: -(len(mascot) + 1)]
+            break
+
+    single_mascots = {
+        "wildcats", "bulldogs", "eagles", "tigers", "bears", "lions",
+        "panthers", "hawks", "cougars", "huskies", "cavaliers", "knights",
+        "cardinals", "hornets", "aggies", "warriors", "pirates", "rebels",
+        "falcons", "owls", "rams", "spartans", "wolverines", "bruins",
+        "gators", "sooners", "longhorns", "buckeyes", "hoosiers",
+        "jayhawks", "razorbacks", "mountaineers", "volunteers",
+        "commodores", "gamecocks", "seminoles", "hurricanes",
+        "wolfpack", "orange", "hokies", "terrapins", "boilermakers",
+        "hawkeyes", "badgers", "cornhuskers", "cyclones", "cowboys",
+        "bison", "zips", "redhawks", "bearcats", "bobcats", "broncos",
+        "musketeers", "flyers", "friars", "hoyas", "colonials",
+        "explorers", "dukes", "spiders", "governors", "racers",
+        "skyhawks", "buccaneers", "mocs", "paladins", "catamounts",
+        "keydets", "seahawks", "chanticleers", "phoenix", "flames",
+        "rockets", "chippewas", "redbirds", "salukis", "sycamores",
+        "braves", "leathernecks", "penguins", "vikings", "mastodons",
+        "jaguars", "dolphins", "ospreys", "hatters", "blazers",
+        "49ers", "monarchs", "highlanders", "peacocks", "jaspers",
+        "gaels", "bonnies", "griffs", "stags", "blackbirds",
+        "seawolves", "retrievers", "minutemen", "lumberjacks",
+        "antelopes", "toreros", "dons", "waves", "pilots", "zags",
+        "broncs", "saints", "utes", "buffaloes", "lobos", "aztecs",
+        "matadors", "gauchos", "mustangs", "roadrunners", "miners",
+        "warhawks", "trojans", "thunderbirds", "lopes", "rattlers",
+        "terriers", "hounds", "mavericks", "ramblers",
+    }
+
+    words = s.split()
+    while len(words) > 1 and words[-1] in single_mascots:
+        words.pop()
+
+    s = " ".join(words)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
 def match_odds_to_games(
     odds_records: list[dict], db
 ) -> list[dict]:
-    """Match SBRO odds to games in the database using fuzzy name matching.
+    """Match SBRO odds to games in the database using normalized name matching.
 
     Updates each odds record's game_id field.
 
@@ -178,23 +328,27 @@ def match_odds_to_games(
     Returns:
         Updated odds records with game_id filled where matched.
     """
-    crosswalk = _load_crosswalk()
     matched = 0
     total = len(odds_records)
+
+    # Cache: group games by date for fast lookup
+    games_cache: dict[str, pd.DataFrame] = {}
+    # Cache normalized ESPN names
+    espn_norm_cache: dict[str, str] = {}
 
     for record in odds_records:
         game_date = record["game_date"]
         if game_date is None:
             continue
 
-        # Get games on this date
-        games_df = db.get_games_for_date(game_date)
+        if game_date not in games_cache:
+            games_cache[game_date] = db.get_games_for_date(game_date)
+        games_df = games_cache[game_date]
         if games_df.empty:
             continue
 
-        # Try to match by team names
-        sbro_home = record["home_team_name"]
-        sbro_away = record["away_team_name"]
+        sbro_home_norm = _normalize_name(record["home_team_name"])
+        sbro_away_norm = _normalize_name(record["away_team_name"])
 
         best_match = None
         best_score = 0
@@ -203,20 +357,24 @@ def match_odds_to_games(
             db_home = game["home_team_name"]
             db_away = game["away_team_name"]
 
-            # Try crosswalk first
-            mapped_home = crosswalk.get(sbro_home, sbro_home)
-            mapped_away = crosswalk.get(sbro_away, sbro_away)
+            if db_home not in espn_norm_cache:
+                espn_norm_cache[db_home] = _normalize_name(db_home)
+            if db_away not in espn_norm_cache:
+                espn_norm_cache[db_away] = _normalize_name(db_away)
+
+            db_home_norm = espn_norm_cache[db_home]
+            db_away_norm = espn_norm_cache[db_away]
 
             score = (
-                fuzz.token_sort_ratio(mapped_home, db_home)
-                + fuzz.token_sort_ratio(mapped_away, db_away)
+                fuzz.token_sort_ratio(sbro_home_norm, db_home_norm)
+                + fuzz.token_sort_ratio(sbro_away_norm, db_away_norm)
             ) / 2
 
             if score > best_score:
                 best_score = score
                 best_match = game["game_id"]
 
-        if best_score >= 70:  # Threshold for accepting a match
+        if best_score >= 75:
             record["game_id"] = best_match
             matched += 1
 
