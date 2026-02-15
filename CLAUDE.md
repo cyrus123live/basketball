@@ -154,7 +154,10 @@ basketball/
 - Feature engine: possessions, pace, ORtg/DRtg, Four Factors via EWMA
 - Naive paper trading pipeline (logistic regression, 2 features)
 - 56 tests passing
-- **Next:** Run `build_historical.py` for full 2016-2026 dataset, then daily cron for 14 days
+- **Historical dataset built:** 63,130 games across 2016-2026, features computed, quality checks passed (10 box score mismatches out of 63K = 0.016%)
+- **Daily cron pipeline:** `scripts/daily_cron.sh` daemon + `scripts/daily_collect.py` with absolute log paths. Tested: collects games, Barttorvik ratings, and Odds API lines in ~104s. Set up via crontab on a persistent machine: `0 11 * * * .venv/bin/python scripts/daily_collect.py`
+- **SBRO odds:** Available through 2022 only (covers 6 backtest seasons). 2023-2025 closing lines TBD (Odds API historical or scraping).
+- **Next:** Download SBRO Excel files into `data/odds/sbro/`, then start Phase 1 baseline model
 
 ## Key References
 - Dean Oliver, "Basketball on Paper" (2004) — Four Factors framework

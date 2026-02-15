@@ -22,12 +22,15 @@ from src.features.compute import compute_all_features_for_date
 from src.utils.config import CURRENT_SEASON
 from src.utils.db import FeatureStore
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+LOG_FILE = PROJECT_ROOT / "logs" / "daily_collect.log"
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("logs/daily_collect.log"),
+        logging.FileHandler(LOG_FILE),
     ],
 )
 logger = logging.getLogger(__name__)
