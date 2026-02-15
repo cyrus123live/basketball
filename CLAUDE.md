@@ -156,8 +156,9 @@ basketball/
 - 56 tests passing
 - **Historical dataset built:** 63,130 games across 2016-2026, features computed, quality checks passed (10 box score mismatches out of 63K = 0.016%)
 - **Daily cron pipeline:** `scripts/daily_cron.sh` daemon + `scripts/daily_collect.py` with absolute log paths. Tested: collects games, Barttorvik ratings, and Odds API lines in ~104s. Set up via crontab on a persistent machine: `0 11 * * * .venv/bin/python scripts/daily_collect.py`
-- **SBRO odds:** Available through 2022 only (covers 6 backtest seasons). 2023-2025 closing lines TBD (Odds API historical or scraping).
-- **Next:** Download SBRO Excel files into `data/odds/sbro/`, then start Phase 1 baseline model
+- **SBRO odds loaded:** 14 files (2008-2021), 8,007 records matched to games across 2016-2021 (33.5% match rate — SBRO covers DonBest rotation only, not all D1 games). ~1,300 games/season with closing spreads and totals. 2022-2025 closing lines TBD (Odds API historical or scraping).
+- **SBRO name matching:** `sbro_loader.py` uses `_normalize_name()` to bridge ESPN full names (`Miami (OH) RedHawks`) and SBRO compressed names (`MiamiOhio`) — camelCase splitting, mascot removal, abbreviation expansion, exact substitutions. Threshold: fuzzy score >= 75.
+- **Next:** Start Phase 1 baseline model — logistic regression with walk-forward validation against historical closing lines
 
 ## Key References
 - Dean Oliver, "Basketball on Paper" (2004) — Four Factors framework
