@@ -128,6 +128,17 @@ def parse_sbro_season(filepath: Path | str, season: int) -> list[dict]:
                 "away_ml": _safe_int(visitor_row.get("ml")),
             }
 
+            # Fix swap bug: ~28% of SBRO records have total/spread swapped.
+            # NCAA totals are always >100, spreads always <50.
+            tc = record["total_close"]
+            sc = record["spread_close"]
+            if tc is not None and sc is not None and abs(tc) < abs(sc):
+                record["total_close"], record["spread_close"] = sc, tc
+            to = record["total_open"]
+            so = record["spread_open"]
+            if to is not None and so is not None and abs(to) < abs(so):
+                record["total_open"], record["spread_open"] = so, to
+
             odds_records.append(record)
             visitor_row = None
 

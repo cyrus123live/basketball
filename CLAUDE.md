@@ -158,7 +158,21 @@ basketball/
 - **Daily cron pipeline:** `scripts/daily_cron.sh` daemon + `scripts/daily_collect.py` with absolute log paths. Tested: collects games, Barttorvik ratings, and Odds API lines in ~104s. Set up via crontab on a persistent machine: `0 11 * * * .venv/bin/python scripts/daily_collect.py`
 - **SBRO odds loaded:** 14 files (2008-2021), 8,007 records matched to games across 2016-2021 (33.5% match rate — SBRO covers DonBest rotation only, not all D1 games). ~1,300 games/season with closing spreads and totals. 2022-2025 closing lines TBD (Odds API historical or scraping).
 - **SBRO name matching:** `sbro_loader.py` uses `_normalize_name()` to bridge ESPN full names (`Miami (OH) RedHawks`) and SBRO compressed names (`MiamiOhio`) — camelCase splitting, mascot removal, abbreviation expansion, exact substitutions. Threshold: fuzzy score >= 75.
-- **Next:** Start Phase 1 baseline model — logistic regression with walk-forward validation against historical closing lines
+
+## Phase 1 Status (Complete — Baseline KILL)
+- **SBRO swap bug fixed:** ~28% of records had total_close/spread_close swapped. Heuristic: if `|total| < |spread|`, swap. Also handled at query time via SQL CASE.
+- **Walk-forward validation framework:** `src/models/walk_forward.py` — trains on prior seasons, validates on next. Folds: train 2016-18→val 2019, train 2016-19→val 2020, train 2016-20→val 2021.
+- **Evaluation framework:** `src/models/evaluation.py` — regression metrics, CLV metrics, simulated betting at -110 juice, calibration by bucket, binomial significance test. 20 unit tests passing.
+- **Feature build-up:** `src/models/totals_baseline.py` — adds features one at a time (pace → ortg → drtg → eFG → TOV% → ORB% → FTr → rest → min_games). Combined/averaged features for totals (not differentials).
+- **Backtest script:** `scripts/backtest_totals.py` — runs full pipeline, prints results table, saves JSON to `backtests/`.
+- **Results (LinearRegression, 13 features, ~4,850 eval games across 3 seasons):**
+  - Model MAE: 14.00 vs closing line MAE: 13.01 — market is ~1 point more accurate
+  - Directional accuracy: 50.3% (below 52.4% break-even)
+  - Simulated ROI: -3.5% (losing money at -110 juice)
+  - Not statistically significant (p = 0.99)
+  - Ridge regression marginally better but same conclusion
+- **Verdict: KILL** — raw EWMA features via linear regression cannot beat the closing line on totals. The market already prices in pace/efficiency/Four Factors.
+- **Next:** The infrastructure is solid. To find edge, need features the market doesn't capture: opponent-adjusted ratings (KenPom-style), Barttorvik integration, situational factors (travel, rest, rivalry), or non-linear models (XGBoost) to find interaction effects.
 
 ## Key References
 - Dean Oliver, "Basketball on Paper" (2004) — Four Factors framework

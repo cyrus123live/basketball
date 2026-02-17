@@ -1,0 +1,532 @@
+{
+  "timestamp": "2026-02-17T03:29:43.872740",
+  "feature_buildup": [
+    {
+      "step": 1,
+      "label": "pace",
+      "feature_names": [
+        "avg_pace"
+      ],
+      "n_features": 1,
+      "mae": 14.545101886819628,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": 0.0,
+      "directional_accuracy": 0.4986398828206738,
+      "avg_clv": 0.19004900529789018,
+      "n_bets": 4355,
+      "roi": -0.04650871516543158,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 14.176115724606387,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.5189088654680719,
+          "avg_clv": 0.6695174098961515,
+          "n_bets": 1466,
+          "roi": -0.0004960932655339199
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.838883389094807,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.49934810951760106,
+          "avg_clv": 0.5263835263835264,
+          "n_bets": 1398,
+          "roi": -0.05507868383404864
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.620306546757687,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.47794117647058826,
+          "avg_clv": -0.6257539203860072,
+          "n_bets": 1491,
+          "roi": -0.08371440765806963
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "label": "+ortg",
+      "feature_names": [
+        "avg_pace",
+        "avg_ortg"
+      ],
+      "n_features": 2,
+      "mae": 14.444336614670647,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": -0.10076527214898157,
+      "directional_accuracy": 0.49612889725884074,
+      "avg_clv": 0.03739296418780136,
+      "n_bets": 4330,
+      "roi": -0.04893974385891244,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 14.13078765933073,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.5189088654680719,
+          "avg_clv": 0.6084300549786195,
+          "n_bets": 1463,
+          "roi": -0.006276020630087614
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.711146085066634,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.49022164276401564,
+          "avg_clv": 0.12226512226512226,
+          "n_bets": 1398,
+          "roi": -0.06119131226427363
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.491076099614576,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.4791666666666667,
+          "avg_clv": -0.6185162846803377,
+          "n_bets": 1469,
+          "roi": -0.0797697877343895
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "label": "+drtg",
+      "feature_names": [
+        "avg_pace",
+        "avg_ortg",
+        "avg_drtg"
+      ],
+      "n_features": 3,
+      "mae": 14.115178312904126,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": -0.3291583017665207,
+      "directional_accuracy": 0.49947687800795143,
+      "avg_clv": 0.19197934173860307,
+      "n_bets": 4257,
+      "roi": -0.048134623187477306,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 13.896469594738345,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.5164290142591444,
+          "avg_clv": 0.4740378741600489,
+          "n_bets": 1445,
+          "roi": -0.010443535703051274
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.148068004210787,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.49282920469361147,
+          "avg_clv": 0.2927927927927928,
+          "n_bets": 1377,
+          "roi": -0.061464316366277146
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.300997339763246,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.4889705882352941,
+          "avg_clv": -0.19089264173703258,
+          "n_bets": 1435,
+          "roi": -0.07329743427304403
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "label": "+efg",
+      "feature_names": [
+        "avg_pace",
+        "avg_ortg",
+        "avg_drtg",
+        "combined_efg",
+        "combined_efg_d"
+      ],
+      "n_features": 5,
+      "mae": 14.061393652202028,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": -0.05378466070209775,
+      "directional_accuracy": 0.501778614772965,
+      "avg_clv": 0.23090674108139642,
+      "n_bets": 4268,
+      "roi": -0.03695578086393456,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 13.86956537140968,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.5251084934903906,
+          "avg_clv": 0.7092241905925474,
+          "n_bets": 1439,
+          "roi": -0.0036641607176700957
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.103767473268078,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.49022164276401564,
+          "avg_clv": 0.1743886743886744,
+          "n_bets": 1390,
+          "roi": -0.053760627861347283
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.210848111928328,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.4895833333333333,
+          "avg_clv": -0.19089264173703258,
+          "n_bets": 1439,
+          "roi": -0.05401478299324025
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "label": "+tov",
+      "feature_names": [
+        "avg_pace",
+        "avg_ortg",
+        "avg_drtg",
+        "combined_efg",
+        "combined_efg_d",
+        "combined_tov",
+        "combined_tov_d"
+      ],
+      "n_features": 7,
+      "mae": 14.066174667068218,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": 0.004781014866189537,
+      "directional_accuracy": 0.504708097928437,
+      "avg_clv": 0.35990241984521587,
+      "n_bets": 4244,
+      "roi": -0.0338445720161083,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 13.896234798038915,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.5220086794792312,
+          "avg_clv": 0.6291997556505803,
+          "n_bets": 1446,
+          "roi": -0.0032692065887086627
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.08141518247711,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.49478487614080835,
+          "avg_clv": 0.4369369369369369,
+          "n_bets": 1355,
+          "roi": -0.04562227440456222
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.220874020688626,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.49693627450980393,
+          "avg_clv": 0.013570566948130277,
+          "n_bets": 1443,
+          "roi": -0.053424053424053417
+        }
+      ]
+    },
+    {
+      "step": 6,
+      "label": "+orb",
+      "feature_names": [
+        "avg_pace",
+        "avg_ortg",
+        "avg_drtg",
+        "combined_efg",
+        "combined_efg_d",
+        "combined_tov",
+        "combined_tov_d",
+        "combined_orb",
+        "combined_orb_d"
+      ],
+      "n_features": 9,
+      "mae": 14.066073043032771,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": -0.00010162403544633491,
+      "directional_accuracy": 0.5063820883029923,
+      "avg_clv": 0.37784337083324687,
+      "n_bets": 4256,
+      "roi": -0.036995898838004096,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 13.908658969558976,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.51828890266584,
+          "avg_clv": 0.5131337813072694,
+          "n_bets": 1437,
+          "roi": -0.01366483203643955
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.084056317984325,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.4980443285528031,
+          "avg_clv": 0.6261261261261262,
+          "n_bets": 1363,
+          "roi": -0.041352631227906354
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.205503841555013,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.5024509803921569,
+          "avg_clv": -0.005729794933655006,
+          "n_bets": 1456,
+          "roi": -0.055944055944055944
+        }
+      ]
+    },
+    {
+      "step": 7,
+      "label": "+ftr",
+      "feature_names": [
+        "avg_pace",
+        "avg_ortg",
+        "avg_drtg",
+        "combined_efg",
+        "combined_efg_d",
+        "combined_tov",
+        "combined_tov_d",
+        "combined_orb",
+        "combined_orb_d",
+        "combined_ftr",
+        "combined_ftr_d"
+      ],
+      "n_features": 11,
+      "mae": 14.121820937735606,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": 0.0557478947028347,
+      "directional_accuracy": 0.501778614772965,
+      "avg_clv": 0.3523636314482865,
+      "n_bets": 4278,
+      "roi": -0.04662331590802839,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 13.95640782389257,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.5040297582145071,
+          "avg_clv": 0.24984728161270617,
+          "n_bets": 1441,
+          "roi": -0.03482430130591129
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.128203772306719,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.5091264667535854,
+          "avg_clv": 0.9414414414414415,
+          "n_bets": 1380,
+          "roi": -0.045718050065876155
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.280851217007532,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.49264705882352944,
+          "avg_clv": -0.13419782870928829,
+          "n_bets": 1457,
+          "roi": -0.05915018406439134
+        }
+      ]
+    },
+    {
+      "step": 8,
+      "label": "+rest",
+      "feature_names": [
+        "avg_pace",
+        "avg_ortg",
+        "avg_drtg",
+        "combined_efg",
+        "combined_efg_d",
+        "combined_tov",
+        "combined_tov_d",
+        "combined_orb",
+        "combined_orb_d",
+        "combined_ftr",
+        "combined_ftr_d",
+        "avg_rest"
+      ],
+      "n_features": 12,
+      "mae": 14.121437689053039,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": -0.00038324868256722766,
+      "directional_accuracy": 0.5011508683825068,
+      "avg_clv": 0.3596593453765839,
+      "n_bets": 4280,
+      "roi": -0.044859813084112146,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 13.955749166306978,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.5021698698078115,
+          "avg_clv": 0.2034208918753818,
+          "n_bets": 1439,
+          "roi": -0.03152441720892033
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.128261766142334,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.5084745762711864,
+          "avg_clv": 0.9343629343629344,
+          "n_bets": 1380,
+          "roi": -0.04433465085638999
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.280302134709807,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.49325980392156865,
+          "avg_clv": -0.058805790108564536,
+          "n_bets": 1461,
+          "roi": -0.0584904486341858
+        }
+      ]
+    },
+    {
+      "step": 9,
+      "label": "+games",
+      "feature_names": [
+        "avg_pace",
+        "avg_ortg",
+        "avg_drtg",
+        "combined_efg",
+        "combined_efg_d",
+        "combined_tov",
+        "combined_tov_d",
+        "combined_orb",
+        "combined_orb_d",
+        "combined_ftr",
+        "combined_ftr_d",
+        "avg_rest",
+        "min_games"
+      ],
+      "n_features": 13,
+      "mae": 14.004672806510918,
+      "closing_mae": 13.005054717826802,
+      "mae_improvement": -0.11676488254212103,
+      "directional_accuracy": 0.5034526051475204,
+      "avg_clv": 0.39261299436452135,
+      "n_bets": 4254,
+      "roi": -0.03451297174851477,
+      "per_season": [
+        {
+          "season": 2019,
+          "n_train": 16492,
+          "n_eval": 1637,
+          "mae": 13.912927512416413,
+          "closing_mae": 13.18937080024435,
+          "directional_accuracy": 0.5114693118412895,
+          "avg_clv": 0.5204642638973732,
+          "n_bets": 1435,
+          "roi": -0.018815331010452963
+        },
+        {
+          "season": 2020,
+          "n_train": 22069,
+          "n_eval": 1554,
+          "mae": 14.031714063093375,
+          "closing_mae": 12.996782496782497,
+          "directional_accuracy": 0.5039113428943938,
+          "avg_clv": 0.7348777348777349,
+          "n_bets": 1377,
+          "roi": -0.0379613124711164
+        },
+        {
+          "season": 2021,
+          "n_train": 27122,
+          "n_eval": 1658,
+          "mae": 14.069376844022967,
+          "closing_mae": 12.829010856453559,
+          "directional_accuracy": 0.4950980392156863,
+          "avg_clv": -0.07750301568154402,
+          "n_bets": 1442,
+          "roi": -0.046841508006556544
+        }
+      ]
+    }
+  ],
+  "model_comparison": {
+    "LinearRegression": {
+      "mae": 14.004672806510918,
+      "directional_accuracy": 0.5034526051475204,
+      "total_bets": 4254,
+      "roi": -0.03451297174851477,
+      "win_rate": 0.5054814108674929
+    },
+    "Ridge(alpha=1.0)": {
+      "mae": 13.993228091337228,
+      "directional_accuracy": 0.5042896003347981,
+      "total_bets": 4244,
+      "roi": -0.032066660954502606,
+      "win_rate": 0.5068002863278454
+    },
+    "Ridge(alpha=10.0)": {
+      "mae": 13.997091388266433,
+      "directional_accuracy": 0.504708097928437,
+      "total_bets": 4261,
+      "roi": -0.038360606771777855,
+      "win_rate": 0.503448275862069
+    }
+  }
+}
