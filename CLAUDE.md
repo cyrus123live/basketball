@@ -174,6 +174,29 @@ basketball/
 - **Verdict: KILL** — raw EWMA features via linear regression cannot beat the closing line on totals. The market already prices in pace/efficiency/Four Factors.
 - **Next:** The infrastructure is solid. To find edge, need features the market doesn't capture: opponent-adjusted ratings (KenPom-style), Barttorvik integration, situational factors (travel, rest, rivalry), or non-linear models (XGBoost) to find interaction effects.
 
+## Phase 2 Status (Complete — Barttorvik + XGBoost KILL)
+- **Barttorvik historical scrape:** 6 seasons (2015-2020) scraped, ~310/353 teams matched per season (88%). Tournament-suffix stripping, possessive handling, expanded mascot list.
+- **Name matching utility:** `src/utils/name_match.py` — `normalize_name()` (tournament suffix strip, possessive 's, abbreviation expansion, mascot removal) + `resolve_barttorvik_team_ids()` (fuzzy match ≥80).
+- **v2 data builders:** `src/models/totals_data_v2.py` — LEFT JOIN on prior-season Barttorvik ratings via team name (not team_id, since IDs are per-season). 5 Barttorvik features: avg_adj_t, avg_adj_o, avg_adj_d, avg_barthag, adj_t_diff.
+- **XGBoost wrapper:** `src/models/xgb_wrapper.py` — sklearn-compatible `XGBEarlyStopping` with internal temporal train/val split. 3 configs: conservative (d3/lr0.05/500), deeper (d4/lr0.03/800), fast (d3/lr0.1/300).
+- **Walk-forward enhanced:** `walk_forward_validate()` now accepts optional `train_builder`/`eval_builder` params (backward-compatible).
+- **Backtest matrix (7 configs, ~3,300-4,250 eval games across 3 seasons):**
+
+| Config | Features | MAE | Line MAE | Dir.Acc | ROI |
+|--------|----------|-----|----------|---------|-----|
+| EWMA + LR | 13 | 14.00 | 13.01 | 50.3% | -3.5% |
+| EWMA + XGB | 13 | 14.01 | 13.01 | 49.8% | -4.9% |
+| Bart + LR | 5 | 14.71 | 13.10 | 49.6% | -5.3% |
+| Bart + XGB | 5 | 14.72 | 13.10 | 49.4% | -4.8% |
+| All + LR | 18 | 13.86 | 13.10 | 49.8% | -4.4% |
+| All + Ridge | 18 | 13.86 | 13.10 | 49.9% | -5.1% |
+| **All + XGB** | **18** | **13.82** | **13.10** | **50.6%** | **-3.9%** |
+
+- **Best config: All + XGB** — marginal improvement (+0.3% dir.acc over Phase 1), but still below 52.4% break-even. `bart_avg_adj_t` is 2nd most important feature (13.5% gain). Not statistically significant (p=0.99).
+- **Key insight:** Barttorvik's prior-season adjusted tempo is a useful feature for XGBoost, but the market already incorporates opponent-adjusted ratings. Prior-season data alone adds stale information — the market has in-season data.
+- **Verdict: KILL** — Barttorvik prior-season + XGBoost cannot beat the closing line on totals.
+- **Next options:** (1) Use *in-season* Barttorvik ratings with careful anti-lookahead (scrape dated snapshots), (2) contextual features (travel distance, altitude, rivalry flags), (3) player-level data (injuries, lineup changes), (4) pivot to first-half totals or spreads, (5) consider the totals market may simply be too efficient with public stats.
+
 ## Key References
 - Dean Oliver, "Basketball on Paper" (2004) — Four Factors framework
 - KenPom.com / Barttorvik.com — adjusted efficiency methodology

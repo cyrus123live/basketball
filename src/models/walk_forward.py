@@ -100,6 +100,8 @@ def walk_forward_validate(
     train_seasons_list: list[list[int]],
     val_seasons: list[int],
     min_edge: float = 1.0,
+    train_builder: Callable = None,
+    eval_builder: Callable = None,
 ) -> WalkForwardResult:
     """Run walk-forward validation across multiple folds.
 
@@ -112,10 +114,19 @@ def walk_forward_validate(
             E.g., [[2016,2017,2018], [2016,2017,2018,2019], ...]
         val_seasons: Validation season for each fold (same length).
         min_edge: Minimum model-line difference to simulate a bet.
+        train_builder: Custom function(db, seasons) -> DataFrame for training.
+            Defaults to build_totals_training_data.
+        eval_builder: Custom function(db, seasons) -> DataFrame for eval.
+            Defaults to build_totals_eval_data.
 
     Returns:
         WalkForwardResult with per-fold and aggregate results.
     """
+    if train_builder is None:
+        train_builder = build_totals_training_data
+    if eval_builder is None:
+        eval_builder = build_totals_eval_data
+
     folds = []
 
     for train_seasons, val_season in zip(train_seasons_list, val_seasons):
@@ -124,8 +135,8 @@ def walk_forward_validate(
         )
 
         # Build datasets
-        train_df = build_totals_training_data(db, train_seasons)
-        eval_df = build_totals_eval_data(db, [val_season])
+        train_df = train_builder(db, train_seasons)
+        eval_df = eval_builder(db, [val_season])
 
         if train_df.empty or eval_df.empty:
             logger.warning(
